@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>中秋博饼 · 好运工具</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="中秋博饼 · 骰子一响，好运登场">
+<meta property="og:description" content="中秋限定博饼挑战：掷骰赢好彩头，没中还有免费补掷机会！">
+<meta property="og:image" content="https://a8223517-lgtm.github.io/bobing-tool/cover.jpg">
+<meta property="og:image:width" content="600">
+<meta property="og:image:height" content="600">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23131a38'/%3E%3Ccircle cx='32' cy='32' r='22' fill='%23f0c75e'/%3E%3Ccircle cx='20' cy='24' r='3' fill='%23e0492f'/%3E%3Ccircle cx='44' cy='40' r='3' fill='%23131a38'/%3E%3Ccircle cx='26' cy='42' r='3' fill='%23131a38'/%3E%3Ccircle cx='38' cy='22' r='3' fill='%23131a38'/%3E%3Ccircle cx='32' cy='32' r='3' fill='%23131a38'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://miaoda.feishu.cn">
 <link href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -107,17 +113,6 @@ header.app-head{text-align:center;margin-bottom:26px}
   border:1px solid rgba(240,199,94,.4);border-radius:999px;padding:2px 8px;margin-left:auto;
   background:rgba(240,199,94,.08);white-space:nowrap;
 }
-
-/* ===== 玩家 ===== */
-.player-row{display:flex;gap:10px;align-items:center}
-.player-row label{font-size:13px;color:var(--muted);letter-spacing:1px;white-space:nowrap}
-.player-row input{
-  flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:12px;
-  padding:10px 14px;color:var(--ink);font-size:15px;outline:none;transition:border-color .2s;
-  font-family:inherit;
-}
-.player-row input::placeholder{color:#6b6490}
-.player-row input:focus{border-color:var(--gold)}
 
 /* ===== 骰子碗 ===== */
 .bowl-wrap{display:flex;flex-direction:column;align-items:center}
@@ -298,8 +293,6 @@ header.app-head{text-align:center;margin-bottom:26px}
 }
 .rec-item .rtime{font-size:11px;color:#6b6490;white-space:nowrap;font-variant-numeric:tabular-nums}
 .rec-item .rmain{min-width:0}
-.rec-item .rplayer{font-size:13px;font-weight:500}
-.rec-item .rplayer .tag{font-size:11px;color:var(--muted);font-weight:400}
 .rec-item .rdice{font-size:12px;color:var(--gold);letter-spacing:2px;margin-top:2px;font-variant-numeric:tabular-nums}
 .rec-item .rprize{
   font-family:"Noto Serif SC",serif;font-size:14px;font-weight:700;padding:5px 11px;border-radius:999px;
@@ -396,15 +389,6 @@ header.app-head{text-align:center;margin-bottom:26px}
     <h1>中秋博饼</h1>
     <p class="sub">骰子一响 · 好运登场</p>
   </header>
-
-  <!-- ===== 玩家 ===== -->
-  <section class="card">
-    <h2><span class="ln"></span>玩家</h2>
-    <div class="player-row">
-      <label for="playerName">昵称</label>
-      <input id="playerName" type="text" maxlength="12" placeholder="输入你的昵称（默认：游客）">
-    </div>
-  </section>
 
   <!-- ===== 博饼 ===== -->
   <section class="card">
@@ -522,7 +506,7 @@ function judgeDice(dice){
 const $=id=>document.getElementById(id);
 const bowl=$('bowl'), rollBtn=$('rollBtn'), resultBanner=$('resultBanner');
 const prizeName=$('prizeName'), prizeDesc=$('prizeDesc'), prizeDice=$('prizeDice');
-const playerInput=$('playerName'), recList=$('recList'), recEmpty=$('recEmpty'), statGrid=$('statGrid');
+const recList=$('recList'), recEmpty=$('recEmpty'), statGrid=$('statGrid');
 const ruleList=$('ruleList'), clearBtn=$('clearBtn');
 const shareImgBtn=$('shareImgBtn'), shareTextBtn=$('shareTextBtn');
 const shareModal=$('shareModal'), modalImg=$('modalImg'), modalTitle=$('modalTitle');
@@ -621,8 +605,7 @@ function roll(){
 function finishRoll(dice){
   const pi=judgeDice(dice);
   const p=PRIZES[pi];
-  const player=getPlayer();
-  lastRec={id:Date.now()+''+Math.floor(Math.random()*1000), time:Date.now(), player:player, dice:[...dice], prize:pi};
+  lastRec={id:Date.now()+''+Math.floor(Math.random()*1000), time:Date.now(), dice:[...dice], prize:pi};
   records.unshift(lastRec);
   if(records.length>200) records.pop();
   saveRecords();
@@ -639,16 +622,9 @@ function finishRoll(dice){
 }
 
 /* ===== 玩家与记录 ===== */
-const REC_KEY='bobing_records_v1', PLAYER_KEY='bobing_player_v1';
+const REC_KEY='bobing_records_v1';
 let records=[];
 try{ records=JSON.parse(localStorage.getItem(REC_KEY)||'[]'); }catch(e){ records=[]; }
-if(playerInput){
-  try{ playerInput.value=localStorage.getItem(PLAYER_KEY)||''; }catch(e){}
-  playerInput.addEventListener('input',()=>{
-    try{ localStorage.setItem(PLAYER_KEY,playerInput.value.trim()); }catch(e){}
-  });
-}
-function getPlayer(){ return playerInput.value.trim()||'游客'; }
 function saveRecords(){ try{ localStorage.setItem(REC_KEY,JSON.stringify(records)); }catch(e){} }
 
 function fmtTime(ts){
@@ -665,8 +641,7 @@ function renderRecords(){
     const top=p.level<=2;
     return '<li class="rec-item">'+
       '<span class="rtime">'+fmtTime(r.time)+'</span>'+
-      '<div class="rmain"><div class="rplayer">'+escapeHtml(r.player)+'<span class="tag"> 玩家</span></div>'+
-      '<div class="rdice">'+r.dice.join(' · ')+'</div></div>'+
+      '<div class="rmain"><div class="rdice">'+r.dice.join(' · ')+'</div></div>'+
       '<span class="rprize'+(top?' top':'')+'" style="'+(p.level===8?'color:#8b84ad;background:rgba(139,132,173,.12);border-color:rgba(139,132,173,.25)':'')+'">'+p.name+'</span>'+
       '</li>';
   }).join('');
@@ -752,7 +727,7 @@ function shareText(rec){
     return '【中秋博饼】\n中秋佳节，一起来博饼！\n骰子一响，好运登场。\n你也来试试手气，博个状元带回家！';
   }
   const p=PRIZES[rec.prize];
-  return '【中秋博饼 · 好运分享】\n玩家「'+rec.player+'」博得【'+p.name+'】\n骰子点数：'+rec.dice.join(' · ')+'\n'+p.bless+'\n骰子一响，好运登场，快来博一博！';
+  return '【中秋博饼 · 好运分享】\n博得【'+p.name+'】\n骰子点数：'+rec.dice.join(' · ')+'\n'+p.bless+'\n骰子一响，好运登场，快来博一博！';
 }
 
 
@@ -3169,6 +3144,7 @@ function drawCloud(ctx,x,y){
   ctx.fill();
   ctx.restore();
 }
+const PRIZE_IMGS_LOADED=PRIZE_IMGS.map(s=>{const im=new Image(); im.src=s; return im;});
 function makeShareCard(rec){
   const ctx=shareCanvas.getContext('2d');
   const W=750,H=1334;
@@ -3177,6 +3153,7 @@ function makeShareCard(rec){
 
   const fontSerif='"Noto Serif SC","Songti SC",serif';
   const fontSans='"Noto Sans SC","PingFang SC",sans-serif';
+  const PRIZE_NAMES=['院校小熊','月饼礼盒','京东50购物卡','视频月卡会员','HD周边玩偶','网易云/QQ音乐会员','5刀优惠券/7天Quick fox会员'];
 
   // ---- 背景：深蓝夜空 ----
   const bg=ctx.createLinearGradient(0,0,0,H);
@@ -3312,61 +3289,94 @@ function makeShareCard(rec){
     }
   }
 
-  // ---- 丰厚奖品等你来博 ----
-  ctx.save();
-  ctx.shadowColor='rgba(0,0,0,.4)';
-  ctx.shadowBlur=18;
-  ctx.shadowOffsetY=6;
-  ctx.fillStyle='#f0c75e';
-  ctx.font='800 46px '+fontSerif;
-  ctx.fillText('丰厚奖品等你来博',W/2,730);
-  ctx.restore();
-  // 两个奖品卡（放大）
-  const pw=310,ph=180,gapw=20,px=(W-(pw*2+gapw))/2,py=758;
-  const prizes=[['月饼礼盒',0],['院校小熊',1]];
-  prizes.forEach((g,i)=>{
-    const x=px+i*(pw+gapw);
-    roundRectPath(ctx,x,py,pw,ph,20);
+  // ---- 中部奖品区 ----
+  const prizeIdx = rec ? rec.prize : -1;
+  const hasPrize = rec && prizeIdx < PRIZE_NAMES.length;
+  if(hasPrize){
+    // 中奖：奖品卡在上（展示实际中奖奖品），「恭喜你获得：奖品名」在下
+    const pw=310,ph=180,px=(W-pw)/2,py=690;
+    roundRectPath(ctx,px,py,pw,ph,20);
     ctx.fillStyle='rgba(8,10,28,.5)';
     ctx.fill();
-    roundRectPath(ctx,x,py,pw,ph,20);
+    roundRectPath(ctx,px,py,pw,ph,20);
     ctx.strokeStyle='rgba(240,199,94,.4)';
     ctx.lineWidth=2;
     ctx.stroke();
-    if(g[1]===0){
-      if(mooncakeImg.complete && mooncakeImg.naturalWidth>0){
-        ctx.save();
-        roundRectPath(ctx,x+pw/2-55,py+18,110,110,16);
-        ctx.clip();
-        ctx.drawImage(mooncakeImg,x+pw/2-55,py+18,110,110);
-        ctx.restore();
-        roundRectPath(ctx,x+pw/2-55,py+18,110,110,16);
-        ctx.strokeStyle='rgba(240,199,94,.45)';
-        ctx.lineWidth=2;
-        ctx.stroke();
-      }else drawGiftIcon(ctx,x+pw/2-55,py+18,110);
+    const LOADED=(typeof PRIZE_IMGS_LOADED!=='undefined')?PRIZE_IMGS_LOADED
+      :((typeof PRIZE_IMGS!=='undefined')?PRIZE_IMGS.map(s=>{const im=new Image(); im.src=s; return im;}):[]);
+    const el=LOADED[prizeIdx]||LOADED[0];
+    if(el&&el.complete&&el.naturalWidth>0){
+      ctx.save();
+      roundRectPath(ctx,px+pw/2-55,py+35,110,110,16);
+      ctx.clip();
+      ctx.drawImage(el,px+pw/2-55,py+35,110,110);
+      ctx.restore();
+      roundRectPath(ctx,px+pw/2-55,py+35,110,110,16);
+      ctx.strokeStyle='rgba(240,199,94,.45)';
+      ctx.lineWidth=2;
+      ctx.stroke();
     }else{
-      if(bearImg.complete && bearImg.naturalWidth>0){
+      drawGiftIcon(ctx,px+pw/2-55,py+35,110);
+    }
+    // 恭喜语（奖品名过长自动缩号）
+    let hs=46;
+    const full='恭喜你获得：'+PRIZE_NAMES[prizeIdx];
+    ctx.save();
+    ctx.font='800 '+hs+'px '+fontSerif;
+    while(ctx.measureText(full).width>620 && hs>30){ hs-=2; ctx.font='800 '+hs+'px '+fontSerif; }
+    ctx.restore();
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,.4)';
+    ctx.shadowBlur=18;
+    ctx.shadowOffsetY=6;
+    ctx.fillStyle='#f0c75e';
+    ctx.font='800 '+hs+'px '+fontSerif;
+    ctx.fillText(full,W/2,940);
+    ctx.restore();
+  }else{
+    // 未中奖 / 邀请卡：保留模板原样（丰厚奖品等你来博 + 两个奖品卡）
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,.4)';
+    ctx.shadowBlur=18;
+    ctx.shadowOffsetY=6;
+    ctx.fillStyle='#f0c75e';
+    ctx.font='800 46px '+fontSerif;
+    ctx.fillText('丰厚奖品等你来博',W/2,730);
+    ctx.restore();
+    const pw=310,ph=180,gapw=20,px=(W-(pw*2+gapw))/2,py=758;
+    const gifts=[['月饼礼盒',mooncakeImg,drawGiftIcon],['院校小熊',bearImg,drawBearIcon]];
+    gifts.forEach((g,i)=>{
+      const x=px+i*(pw+gapw);
+      roundRectPath(ctx,x,py,pw,ph,20);
+      ctx.fillStyle='rgba(8,10,28,.5)';
+      ctx.fill();
+      roundRectPath(ctx,x,py,pw,ph,20);
+      ctx.strokeStyle='rgba(240,199,94,.4)';
+      ctx.lineWidth=2;
+      ctx.stroke();
+      if(g[1]&&g[1].complete&&g[1].naturalWidth>0){
         ctx.save();
         roundRectPath(ctx,x+pw/2-55,py+18,110,110,16);
         ctx.clip();
-        ctx.drawImage(bearImg,x+pw/2-55,py+18,110,110);
+        ctx.drawImage(g[1],x+pw/2-55,py+18,110,110);
         ctx.restore();
         roundRectPath(ctx,x+pw/2-55,py+18,110,110,16);
         ctx.strokeStyle='rgba(240,199,94,.45)';
         ctx.lineWidth=2;
         ctx.stroke();
-      }else drawBearIcon(ctx,x+pw/2-55,py+18,110);
-    }
-    ctx.fillStyle='#f0c75e';
-    ctx.font='700 32px '+fontSerif;
-    ctx.fillText(g[0],x+pw/2,py+ph-16);
-  });
+      }else{
+        g[2](ctx,x+pw/2-55,py+18,110);
+      }
+      ctx.fillStyle='#f0c75e';
+      ctx.font='700 32px '+fontSerif;
+      ctx.fillText(g[0],x+pw/2,py+ph-16);
+    });
+  }
 
   // ---- 二维码（用户导流码，白底圆角）----
   const qSize=180,qx=(W-qSize)/2,qy=985;
   ctx.save();
-  ctx.shadowColor='rgba(0,0,0,.35)';
+  ctx.shadowColor='rgba(0,0,35,.35)';
   ctx.shadowBlur=20;
   ctx.shadowOffsetY=6;
   roundRectPath(ctx,qx-8,qy-8,qSize+16,qSize+16,18);
@@ -3390,8 +3400,15 @@ function makeShareCard(rec){
   ctx.fill();
   ctx.restore();
   ctx.fillStyle='#fff6e0';
-  ctx.font='700 36px '+fontSerif;
-  ctx.fillText('中秋快乐 扫码来博饼',W/2,by+50);
+  // 按钮文案（过长自动缩号，保证不超出按钮宽度）
+  const btnTxt='参与博饼 · 月饼礼盒&院校小熊等你来领';
+  let bs=36;
+  ctx.save();
+  ctx.font='700 '+bs+'px '+fontSerif;
+  while(ctx.measureText(btnTxt).width>bw-40 && bs>24){ bs-=2; ctx.font='700 '+bs+'px '+fontSerif; }
+  ctx.restore();
+  ctx.font='700 '+bs+'px '+fontSerif;
+  ctx.fillText(btnTxt,W/2,by+50);
 }
 
 /* ===== 分享交互 ===== */
