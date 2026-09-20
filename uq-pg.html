@@ -3441,7 +3441,7 @@ function openShareModal(){
   lastShareUrl=null;
   shareCanvas.toBlob(blob=>{ if(blob) lastShareUrl=URL.createObjectURL(blob); },'image/png');
   const isWeChat=/micromessenger/i.test(navigator.userAgent);
-  modalTip.textContent=isWeChat?'长按海报 → 发送给朋友，转发给小助手领奖':'保存海报，找小助手领取奖品';
+  if(modalTip) modalTip.textContent=isWeChat?'长按海报 → 发送给朋友，转发给小助手领奖':'保存海报，找小助手领取奖品';
   downloadBtn.textContent=isWeChat?'长按海报转发':'保存图片';
   modalTitle.textContent=rec?'博饼结果分享卡':'博饼邀请分享卡';
   shareModal.classList.add('open');
@@ -3525,10 +3525,10 @@ function refreshPwState(){
   }
 }
 const pityModal=$('pityModal'), pityOkBtn=$('pityOkBtn');
-function openPityModal(){ pityModal.classList.add('open'); }
-function closePityModal(){ pityModal.classList.remove('open'); }
-pityOkBtn.addEventListener('click',closePityModal);
-pityModal.addEventListener('click',e=>{ if(e.target===pityModal) closePityModal(); });
+function openPityModal(){ if(!pityModal) return; pityModal.classList.add('open'); }
+function closePityModal(){ if(!pityModal) return; pityModal.classList.remove('open'); }
+if(pityOkBtn) pityOkBtn.addEventListener('click',closePityModal);
+if(pityModal) pityModal.addEventListener('click',e=>{ if(e.target===pityModal) closePityModal(); });
 function openPwModal(){
   pwInput.value=''; pwErr.textContent='';
   pwModal.classList.add('open');
