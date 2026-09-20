@@ -515,7 +515,7 @@ const shareCanvas=$('shareCanvas'), toastEl=$('toast');
 
 let rolling=false;
 let lastRec=null;
-let lastShareUrl=null;
+let lastShareUrl=null, lastShareDataUrl=null;
 
 /* ===== 骰子 ===== */
 function buildDie(){
@@ -3415,14 +3415,19 @@ function makeShareCard(rec){
 function openShareModal(){
   const rec=lastRec;
   makeShareCard(rec);
-  shareCanvas.toBlob(blob=>{
-    if(!blob){ toast('卡片生成失败，请重试'); return; }
-    if(lastShareUrl) URL.revokeObjectURL(lastShareUrl);
-    lastShareUrl=URL.createObjectURL(blob);
-    modalImg.src=lastShareUrl;
-    modalTitle.textContent=rec?'博饼结果分享卡':'博饼邀请分享卡';
-    shareModal.classList.add('open');
-  },'image/png');
+  let dataUrl=null;
+  try{ dataUrl=shareCanvas.toDataURL('image/png'); }
+  catch(e){ toast('卡片生成失败，请重试'); return; }
+  lastShareDataUrl=dataUrl;
+  modalImg.src=dataUrl;   // dataURL：微信内长按可直接保存/转发
+  if(lastShareUrl) URL.revokeObjectURL(lastShareUrl);
+  lastShareUrl=null;
+  shareCanvas.toBlob(blob=>{ if(blob) lastShareUrl=URL.createObjectURL(blob); },'image/png');
+  const isWeChat=/micromessenger/i.test(navigator.userAgent);
+  modalTip.textContent=isWeChat?'长按海报 → 发送给朋友，转发给小助手领奖':'保存海报，找小助手领取奖品';
+  downloadBtn.textContent=isWeChat?'长按海报转发':'保存图片';
+  modalTitle.textContent=rec?'博饼结果分享卡':'博饼邀请分享卡';
+  shareModal.classList.add('open');
 }
 async function copyShareText(){
   const txt=shareText(lastRec);
@@ -3445,10 +3450,14 @@ function pad2(n){ return String(n).padStart(2,'0'); }
 shareImgBtn.addEventListener('click',openShareModal);
 shareTextBtn.addEventListener('click',copyShareText);
 downloadBtn.addEventListener('click',()=>{
-  if(!lastShareUrl){ toast('请先生成分享卡片'); return; }
+  if(/micromessenger/i.test(navigator.userAgent)){
+    toast('长按上方海报 → 「发送给朋友」转发给小助手');
+    return;
+  }
+  if(!lastShareUrl&&!lastShareDataUrl){ toast('请先生成分享卡片'); return; }
   const d=new Date();
   const a=document.createElement('a');
-  a.href=lastShareUrl;
+  a.href=lastShareUrl||lastShareDataUrl;
   a.download='中秋博饼-分享-'+d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate())+'-'+pad2(d.getHours())+pad2(d.getMinutes())+'.png';
   document.body.appendChild(a);
   a.click();
